@@ -22,13 +22,7 @@ public class LoanService {
         if (book.getCopies() == 0) {
             throw new IllegalStateException("No copy of " + isbn + " is available");
         }
-        int count = 0;
-        for (Loan loan : catalog.allLoans()) {
-            if (loan.getMemberId().equals(memberId)) {
-                count++;
-            }
-        }
-        if (count >= MAX_LOANS) {
+        if (loansOf(memberId) >= MAX_LOANS) {
             throw new IllegalStateException("A member can borrow at most " + MAX_LOANS + " books");
         }
         book.setCopies(book.getCopies() - 1);
@@ -43,13 +37,23 @@ public class LoanService {
         catalog.deleteLoan(loan);
     }
 
-    public List<Loan> late(LocalDate today) {
-        List<Loan> late = new ArrayList<>();
+    public List<Loan> overdueLoans(LocalDate today) {
+        List<Loan> overdue = new ArrayList<>();
         for (Loan loan : catalog.allLoans()) {
             if (loan.getDueDate().isBefore(today)) {
-                late.add(loan);
+                overdue.add(loan);
             }
         }
-        return late;
+        return overdue;
+    }
+
+    private int loansOf(String memberId) {
+        int count = 0;
+        for (Loan loan : catalog.allLoans()) {
+            if (loan.getMemberId().equals(memberId)) {
+                count++;
+            }
+        }
+        return count;
     }
 }
